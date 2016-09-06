@@ -6,37 +6,37 @@ using Microsoft.Diagnostics.Tracing;
 
 namespace Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics
 {
-    internal class EventGenerator : IEventGenerator
+    internal class SystemEventGenerator : ISystemEventGenerator
     {
         public void LogFunctionsEventVerbose(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary)
         {
-            FunctionsEvents.Log.RaiseFunctionsEventVerbose(subscriptionId, appName, functionName, eventName, source, details, summary);
+            SystemEvents.Log.RaiseFunctionsEventVerbose(subscriptionId, appName, functionName, eventName, source, details, summary);
         }
 
         public void LogFunctionsEventInfo(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary)
         {
-            FunctionsEvents.Log.RaiseFunctionsEventInfo(subscriptionId, appName, functionName, eventName, source, details, summary);
+            SystemEvents.Log.RaiseFunctionsEventInfo(subscriptionId, appName, functionName, eventName, source, details, summary);
         }
 
         public void LogFunctionsEventWarning(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary)
         {
-            FunctionsEvents.Log.RaiseFunctionsEventWarning(subscriptionId, appName, functionName, eventName, source, details, summary);
+            SystemEvents.Log.RaiseFunctionsEventWarning(subscriptionId, appName, functionName, eventName, source, details, summary);
         }
 
         public void LogFunctionsEventError(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary)
         {
-            FunctionsEvents.Log.RaiseFunctionsEventError(subscriptionId, appName, functionName, eventName, source, details, summary);
+            SystemEvents.Log.RaiseFunctionsEventError(subscriptionId, appName, functionName, eventName, source, details, summary);
         }
 
         public void LogFunctionsMetrics(string subscriptionId, string appName, string eventName, long average, long minimum, long maximum, long count)
         {
-            FunctionsEvents.Log.RaiseFunctionsMetrics(subscriptionId, appName, eventName, average, minimum, maximum, count);
+            SystemEvents.Log.RaiseFunctionsMetrics(subscriptionId, appName, eventName, average, minimum, maximum, count);
         }
 
         [EventSource(Guid = "08D0D743-5C24-43F9-9723-98277CEA5F9B")]
-        public sealed class FunctionsEvents : EventSource
+        public sealed class SystemEvents : EventSource
         {
-            internal static readonly FunctionsEvents Log = new FunctionsEvents();
+            internal static readonly SystemEvents Log = new SystemEvents();
 
             [Event(65520, Level = EventLevel.Verbose, Channel = EventChannel.Operational)]
             public void RaiseFunctionsEventVerbose(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary)

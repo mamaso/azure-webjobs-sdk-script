@@ -3,7 +3,7 @@
 
 namespace Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics
 {
-    public interface IEventGenerator
+    public interface ISystemEventGenerator
     {
         void LogFunctionsEventVerbose(string subscriptionId, string appName, string functionName, string eventName, string source, string details, string summary);
 

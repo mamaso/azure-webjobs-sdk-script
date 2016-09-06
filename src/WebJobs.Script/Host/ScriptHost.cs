@@ -201,7 +201,7 @@ namespace Microsoft.Azure.WebJobs.Script
 
             ApplyConfiguration(hostConfig, ScriptConfig);
 
-            // Set up a host level TraceMonitor that will receive notificaition
+            // Set up a host level TraceMonitor that will receive notification
             // of ALL errors that occur. This allows us to inspect/log errors.
             var traceMonitor = new TraceMonitor()
                 .Filter(p => { return true; })

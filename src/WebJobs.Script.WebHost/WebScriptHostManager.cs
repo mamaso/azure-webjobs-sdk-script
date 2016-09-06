@@ -329,21 +329,24 @@ namespace Microsoft.Azure.WebJobs.Script.WebHost
             return function;
         }
 
-        protected override void OnInitializeConfig(JobHostConfiguration config)
+        protected override void OnInitializeConfig(ScriptHostConfiguration config)
         {
+            config.TraceWriter = new SystemTraceWriter(TraceLevel.Verbose);
+
             base.OnInitializeConfig(config);
-            
+
             // Add our WebHost specific services
-            config.AddService<IMetricsLogger>(_metricsLogger);
+            var hostConfig = config.HostConfig;
+            hostConfig.AddService<IMetricsLogger>(_metricsLogger);
 
             // Register the new "FastLogger" for Dashboard support
             var dashboardString = AmbientConnectionStringProvider.Instance.GetConnectionString(ConnectionStringNames.Dashboard);
             if (dashboardString != null)
             {
                 var fastLogger = new FastLogger(dashboardString);
-                config.AddService<IAsyncCollector<FunctionInstanceLogEntry>>(fastLogger);
+                hostConfig.AddService<IAsyncCollector<FunctionInstanceLogEntry>>(fastLogger);
             }
-            config.DashboardConnectionString = null; // disable slow logging 
+            hostConfig.DashboardConnectionString = null; // disable slow logging 
         }
 
         protected override void OnHostStarted()

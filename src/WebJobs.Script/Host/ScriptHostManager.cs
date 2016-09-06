@@ -81,7 +81,7 @@ namespace Microsoft.Azure.WebJobs.Script
                     {
                         HostId = _config.HostConfig.HostId
                     };
-                    OnInitializeConfig(_config.HostConfig);
+                    OnInitializeConfig(_config);
                     newInstance = _scriptHostFactory.Create(_config);
                     _traceWriter = newInstance.TraceWriter;
 
@@ -243,7 +243,7 @@ namespace Microsoft.Azure.WebJobs.Script
             return instances;
         }
 
-        protected virtual void OnInitializeConfig(JobHostConfiguration config)
+        protected virtual void OnInitializeConfig(ScriptHostConfiguration config)
         {
         }
 
