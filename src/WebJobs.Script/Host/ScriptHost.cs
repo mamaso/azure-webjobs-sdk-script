@@ -30,6 +30,7 @@ using Microsoft.Azure.WebJobs.Script.Binding;
 using Microsoft.Azure.WebJobs.Script.Config;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.Diagnostics;
+using Microsoft.Azure.WebJobs.Script.Dispatch;
 using Microsoft.Azure.WebJobs.Script.Eventing;
 using Microsoft.Azure.WebJobs.Script.Eventing.File;
 using Microsoft.Azure.WebJobs.Script.Extensibility;
@@ -64,6 +65,7 @@ namespace Microsoft.Azure.WebJobs.Script
         private ILogger _startupLogger;
         private FileWatcherEventSource _fileEventSource;
         private IDisposable _fileEventsSubscription;
+        private IFunctionDispatcher _functionDispatcher;
 
         protected internal ScriptHost(IScriptHostEnvironment environment,
             IScriptEventManager eventManager,
@@ -167,6 +169,12 @@ namespace Microsoft.Azure.WebJobs.Script
         }
 
         internal DateTime LastDebugNotify { get; set; }
+
+        internal IFunctionDispatcher FunctionDispatcher
+        {
+            get => _functionDispatcher;
+            set => _functionDispatcher = value;
+        }
 
         /// <summary>
         /// Returns true if the specified name is the name of a known function,
@@ -444,6 +452,8 @@ namespace Microsoft.Azure.WebJobs.Script
                 {
                     PurgeOldLogDirectories();
                 }
+
+                _functionDispatcher = new FunctionDispatcher();
             }
         }
 

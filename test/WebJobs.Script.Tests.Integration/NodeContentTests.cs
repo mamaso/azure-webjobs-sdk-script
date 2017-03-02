@@ -246,7 +246,7 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             var obj = new { a = 1 };
 
             // consider using fabiocav custom xml formatter
-            var str = "<ArrayOfKeyValueOfstringanyTypexmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><KeyValueOfstringanyType><Key>a</Key><Valuexmlns:d3p1=\"http://www.w3.org/2001/XMLSchema\"i:type=\"d3p1:int\">1</Value></KeyValueOfstringanyType></ArrayOfKeyValueOfstringanyType>";
+            var str = "<ArrayOfKeyValueOfstringanyTypexmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><KeyValueOfstringanyType><Key>a</Key><Valuexmlns:d3p1=\"http://www.w3.org/2001/XMLSchema\"i:type=\"d3p1:long\">1</Value></KeyValueOfstringanyType></ArrayOfKeyValueOfstringanyType>";
             var content = await Response(obj, "application/xml; charset=utf-8");
             content = Regex.Replace(content, @"\s+", string.Empty);
             Assert.Equal(str, content);
@@ -258,7 +258,7 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             var obj = new { a = 1 };
 
             // consider using fabiocav custom xml formatter
-            var str = "<ArrayOfKeyValueOfstringanyTypexmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><KeyValueOfstringanyType><Key>a</Key><Valuexmlns:d3p1=\"http://www.w3.org/2001/XMLSchema\"i:type=\"d3p1:int\">1</Value></KeyValueOfstringanyType></ArrayOfKeyValueOfstringanyType>";
+            var str = "<ArrayOfKeyValueOfstringanyTypexmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"xmlns=\"http://schemas.microsoft.com/2003/10/Serialization/Arrays\"><KeyValueOfstringanyType><Key>a</Key><Valuexmlns:d3p1=\"http://www.w3.org/2001/XMLSchema\"i:type=\"d3p1:long\">1</Value></KeyValueOfstringanyType></ArrayOfKeyValueOfstringanyType>";
             var content = await Return(obj, "application/xml; charset=utf-8");
             content = Regex.Replace(content, @"\s+", string.Empty);
             Assert.Equal(str, content);
