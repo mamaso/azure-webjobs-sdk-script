@@ -9,6 +9,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Web.Http;
 using Microsoft.Azure.WebJobs.Host;
@@ -260,7 +261,7 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             Assert.Equal(TraceLevel.Info, scriptTrace.Level);
             JObject logEntry = JObject.Parse(scriptTrace.Message);
             Assert.Equal("This is a test", logEntry["message"]);
-            Assert.Equal("v6.5.0", (string)logEntry["version"]);
+            Assert.Equal("v6.9.4", (string)logEntry["version"]);
             Assert.Equal(testData, logEntry["input"]);
 
             // verify log levels
@@ -916,6 +917,7 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
             string body = await response.Content.ReadAsStringAsync();
+            Debug.WriteLine(body);
             JObject resultObject = JObject.Parse(body);
             Assert.Equal("object", (string)resultObject["reqBodyType"]);
             Assert.True((bool)resultObject["reqBodyIsArray"]);
@@ -1017,17 +1019,17 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             var blob = Fixture.TestOutputContainer.GetBlockBlobReference(id1);
             await TestHelpers.WaitForBlobAsync(blob);
             string blobContent = blob.DownloadText();
-            Assert.Equal("Test Blob 1", blobContent.Trim());
+            Assert.Equal("Test Blob 1", blobContent.TrimEnd('\0').Trim('"'));
 
             blob = Fixture.TestOutputContainer.GetBlockBlobReference(id2);
             await TestHelpers.WaitForBlobAsync(blob);
             blobContent = blob.DownloadText();
-            Assert.Equal("Test Blob 2", blobContent.Trim());
+            Assert.Equal("Test Blob 2", blobContent.TrimEnd('\0').Trim('"'));
 
             blob = Fixture.TestOutputContainer.GetBlockBlobReference(id3);
             await TestHelpers.WaitForBlobAsync(blob);
             blobContent = blob.DownloadText();
-            Assert.Equal("Test Blob 3", blobContent.Trim());
+            Assert.Equal("Test Blob 3", blobContent.TrimEnd('\0').Trim('"'));
         }
 
         [Fact]
@@ -1228,7 +1230,9 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
 
             Assert.Same(t, result);
             Assert.True(logs.Any(l => l.Contains("FunctionName:Scenarios")));
-            Assert.True(logs.Any(l => l.Contains($"FunctionDirectory:{Path.Combine(Fixture.Host.ScriptConfig.RootScriptPath, "Scenarios")}")));
+            string unixStyleFilePath = $"FunctionDirectory:{Path.Combine(Fixture.Host.ScriptConfig.RootScriptPath, "Scenarios")}";
+            unixStyleFilePath = unixStyleFilePath.Replace('\\', '/');
+            Assert.True(logs.Any(l => l.Contains(unixStyleFilePath)));
         }
 
         [Fact]
