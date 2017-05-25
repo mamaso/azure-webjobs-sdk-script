@@ -4,13 +4,13 @@
       "type": "queueTrigger",
       "name": "workItem",
       "direction": "in",
-      "queueName": "samples-workitems-lang5"
+      "queueName": "samples-workitems"
     },
     {
-      "type": "queue",
-      "name": "workItemOut",
+      "type": "blob",
+      "name": "$return",
       "direction": "out",
-      "queueName": "samples-workitems-out"
+      "path": "samples-workitems/{id}"
     }
   ]
 }
