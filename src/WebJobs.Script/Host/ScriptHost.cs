@@ -377,6 +377,8 @@ namespace Microsoft.Azure.WebJobs.Script
                 TraceWriter.Info(message);
                 _startupLogger?.LogInformation(message);
 
+                _functionDispatcher = new FunctionDispatcher(ScriptConfig);
+
                 if (ScriptConfig.FileWatchingEnabled)
                 {
                     _fileEventSource = new FileWatcherEventSource(EventManager, EventSources.ScriptFiles, ScriptConfig.RootScriptPath);
@@ -384,6 +386,11 @@ namespace Microsoft.Azure.WebJobs.Script
                     _fileEventsSubscription = EventManager.OfType<FileEvent>()
                         .Where(f => string.Equals(f.Source, EventSources.ScriptFiles, StringComparison.Ordinal))
                         .Subscribe(e => OnFileChanged(e.FileChangeArguments));
+
+                    // TODO: how to handle async subscriptions? post 'handlefileevent' completed back to event stream?
+                    // EventManager.OfType<FileEvent>()
+                    //    .Where(f => string.Equals(f.Source, EventSources.ScriptFiles, StringComparison.Ordinal))
+                    //    .Subscribe((e) => _functionDispatcher.HandleFileEventAsync(e.FileChangeArguments));
                 }
 
                 // If a file change should result in a restart, we debounce the event to
@@ -452,8 +459,6 @@ namespace Microsoft.Azure.WebJobs.Script
                 {
                     PurgeOldLogDirectories();
                 }
-
-                _functionDispatcher = new FunctionDispatcher();
             }
         }
 
