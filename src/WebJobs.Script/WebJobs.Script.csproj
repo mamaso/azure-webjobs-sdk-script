@@ -448,6 +448,7 @@
     <Compile Include="Description\DotNet\Compilation\Raw\RawAssemblyCompilationService.cs" />
     <Compile Include="Description\FunctionInvocationContext.cs" />
     <Compile Include="Description\FunctionLoader.cs" />
+    <Compile Include="Description\ILanguageInvoker.cs" />
     <Compile Include="Description\LogTargets.cs" />
     <Compile Include="Description\Node\Compilation\ConditionalJavaScriptCompilationService.cs" />
     <Compile Include="Description\Node\Compilation\IJavaScriptCompilation.cs" />
@@ -506,10 +507,9 @@
     <Compile Include="Dispatch\FunctionDispatcher.cs" />
     <Compile Include="Dispatch\IFunctionDispatcher.cs" />
     <Compile Include="Dispatch\ILanguageWorkerChannel.cs" />
-    <Compile Include="Dispatch\ILanguageWorkerPool.cs" />
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
-    <Compile Include="Dispatch\LanguageWorkerPool.cs" />
+    <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
     <Compile Include="EnvironmentSettingNames.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Eventing\File\FileEvent.cs" />
@@ -562,6 +562,7 @@
     <Compile Include="RPC\Grpc\GoogleRpcServer.cs" />
     <Compile Include="RPC\Grpc\GoogleRpc.cs" />
     <Compile Include="RPC\Grpc\GoogleRpcClient.cs" />
+    <Compile Include="RPC\Grpc\GrpcServer.cs" />
     <Compile Include="RPC\IRpc.cs" />
     <Compile Include="RPC\IRpcFactory.cs" />
     <Compile Include="RPC\RpcConstants.cs" />
