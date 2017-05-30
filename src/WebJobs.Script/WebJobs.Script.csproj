@@ -571,16 +571,17 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyHelper.cs" />
-    <Compile Include="RPC\Grpc\GoogleRpcServer.cs" />
-    <Compile Include="RPC\Grpc\GoogleRpc.cs" />
-    <Compile Include="RPC\Grpc\GoogleRpcClient.cs" />
+    <Compile Include="Rpc\Grpc\GoogleRpcServer.cs" />
+    <Compile Include="Rpc\Grpc\GoogleRpc.cs" />
+    <Compile Include="Rpc\IRpc.cs" />
     <Compile Include="RPC\Grpc\GrpcServer.cs" />
-    <Compile Include="RPC\IRpc.cs" />
-    <Compile Include="RPC\IRpcFactory.cs" />
-    <Compile Include="RPC\RpcConstants.cs" />
-    <Compile Include="RPC\RpcFactory.cs" />
-    <Compile Include="RPC\Utilities.cs" />
-    <Compile Include="RPC\ZeroMQ\ZeroMQ.cs" />
+    <Compile Include="Rpc\RpcConstants.cs" />
+    <Compile Include="Rpc\RpcFactory.cs" />
+    <Compile Include="Rpc\Eventing\RpcMessageEvent.cs" />
+    <Compile Include="Rpc\Eventing\RpcMessageReceivedEventArgs.cs" />
+    <Compile Include="Rpc\Eventing\RpcRequestStreamEventSource.cs" />
+    <Compile Include="Rpc\Eventing\RpcRequestStreamWatcher.cs" />
+    <Compile Include="Rpc\Utilities.cs" />
     <Compile Include="ScriptConstants.cs" />
     <Compile Include="Config\ScriptSettingsManager.cs" />
     <Compile Include="Utility.cs" />
