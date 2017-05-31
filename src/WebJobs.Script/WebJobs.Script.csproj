@@ -559,10 +559,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyHelper.cs" />
-    <Compile Include="Rpc\Grpc\GoogleRpcServer.cs" />
-    <Compile Include="Rpc\Grpc\GoogleRpc.cs" />
     <Compile Include="Rpc\IRpc.cs" />
-    <Compile Include="RPC\Grpc\GrpcServer.cs" />
+    <Compile Include="Rpc\IRpcFactory.cs" />
     <Compile Include="Rpc\RpcConstants.cs" />
     <Compile Include="Rpc\RpcFactory.cs" />
     <Compile Include="Rpc\Eventing\RpcMessageEvent.cs" />
