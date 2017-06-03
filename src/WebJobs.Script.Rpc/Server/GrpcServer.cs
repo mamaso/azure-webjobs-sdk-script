@@ -24,6 +24,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
                 // TODO: port selection, encryption
                 Ports = { new ServerPort("localhost", 50051, ServerCredentials.Insecure) }
             };
+            
         }
 
         public IObservable<ChannelContext> Connections => _serverImpl.Connections;
