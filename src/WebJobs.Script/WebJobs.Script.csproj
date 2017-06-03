@@ -510,6 +510,7 @@
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
+    <Compile Include="Rpc\RpcMessageConversionExtensions.cs" />
     <Compile Include="EnvironmentSettingNames.cs" />
     <Compile Include="ErrorCodes.cs" />
     <Compile Include="Eventing\File\FileEvent.cs" />
