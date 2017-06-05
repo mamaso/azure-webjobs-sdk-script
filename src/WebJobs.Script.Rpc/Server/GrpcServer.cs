@@ -22,7 +22,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
                 Services = { FunctionRpc.BindService(_serverImpl) },
 
                 // TODO: port selection, encryption
-                Ports = { new ServerPort("localhost", 50051, ServerCredentials.Insecure) }
+                Ports = { new ServerPort("127.0.0.1", 50051, ServerCredentials.Insecure) }
             };
             
         }

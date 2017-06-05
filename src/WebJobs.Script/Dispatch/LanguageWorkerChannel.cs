@@ -12,6 +12,7 @@ using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.Rpc;
 using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
+using Newtonsoft.Json.Linq;
 
 namespace Microsoft.Azure.WebJobs.Script.Dispatch
 {
@@ -96,6 +97,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
                     _context = msg;
                     connectionSource.SetResult(true);
                     subscription?.Dispose();
+                    _context.InputStream.Subscribe(HandleLogs);
                 }, exc =>
                 {
                     connectionSource.SetException(exc);
@@ -105,6 +107,34 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             Task startWorkerTask = StartWorkerAsync(_workerConfig, requestId);
 
             await Task.WhenAll(startWorkerTask, connectionSource.Task);
+        }
+
+        private void HandleLogs(StreamingMessage msg)
+        {
+            // TODO figure out live logging
+            if (msg.Type == StreamingMessage.Types.Type.RpcLog)
+            {
+                var logMessage = msg.Content.Unpack<RpcLog>();
+
+                // TODO get rest of the properties from log message
+                JObject logData = JObject.Parse(logMessage.Message);
+                string message = (string)logData["msg"];
+                if (message != null)
+                {
+                    try
+                    {
+                        // TODO Initialize SystemTraceWriter
+                         TraceLevel level = (TraceLevel)System.Enum.Parse(typeof(TraceLevel), logData["lvl"].ToString());
+                         _logger.Trace(new TraceEvent(level, message));
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // if a function attempts to write to a disposed
+                        // TraceWriter. Might happen if a function tries to
+                        // log after calling done()
+                    }
+                }
+            }
         }
 
         public Task StopAsync()
