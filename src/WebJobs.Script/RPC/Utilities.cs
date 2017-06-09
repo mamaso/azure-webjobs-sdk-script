@@ -63,7 +63,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
             return endPointAvailable;
         }
 
-        public static MapField<string, TypedData> GetMetadataFromDictionary(Dictionary<string, object> scriptExecutionContextDictionary)
+        public static MapField<string, TypedData> GetMetadataFromDictionary(Dictionary<string, object> scriptExecutionContextDictionary, string key = "")
         {
             MapField<string, TypedData> itemsDictionary = new MapField<string, TypedData>();
             foreach (var item in scriptExecutionContextDictionary)
@@ -108,8 +108,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
                 }
                 else if (item.Key == "params")
                 {
-                    // TODO
-                    // requestMessage.Params.Add(GetMetadataFromDictionary((Dictionary<string, object>)item.Value));
+                    requestMessage.Params.Add(GetMetadataFromDictionary((Dictionary<string, object>)item.Value));
                 }
                 else
                 {
@@ -157,7 +156,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
             }
         }
 
-        public static object ConvertFromHttpMessageToExpando(RpcHttp inputMessage, string key = "")
+        public static object ConvertFromHttpMessageToExpando(RpcHttp inputMessage)
         {
             if (inputMessage == null)
             {
@@ -206,7 +205,7 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
                         expando.body = bodyConverted;
                     }
                 }
-                if (key == "res" && inputMessage.IsRaw)
+                if (inputMessage.IsRaw)
                 {
                     expando.isRaw = true;
                 }
@@ -258,34 +257,41 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
             }
         }
 
-        public static TypedData ConvertObjectToTypedData(object scriptExecutionContextValue)
+        public static TypedData ConvertObjectToTypedData(object scriptExecutionContextValue, string key = "")
         {
             TypedData typedData = new TypedData();
             if (scriptExecutionContextValue == null)
             {
-                return null;
+                return typedData;
+
+                // return null;
             }
 
-            // TODO simplify looking up types
+            // if (key == "req" || key == "request" || key == "webhookReq")
+            // {
+            //    RpcHttp httpRequest = BuildRpcHttpMessage((Dictionary<string, object>)item.Key);
+            //    typedData.TypeVal = RpcDataType.Http;
+            //    typedData.HttpVal = httpRequest;
+            // }
             if (scriptExecutionContextValue.GetType().FullName.Contains("Byte"))
             {
                 typedData.TypeVal = RpcDataType.Bytes;
                 typedData.BytesVal = ByteString.CopyFrom((byte[])scriptExecutionContextValue);
-            }
-            else if (scriptExecutionContextValue.GetType() == typeof(string) || scriptExecutionContextValue.GetType() == typeof(int))
-            {
-                typedData.TypeVal = RpcDataType.String;
-                typedData.StringVal = scriptExecutionContextValue.ToString();
             }
             else if (scriptExecutionContextValue.GetType().FullName.Contains("Generic.Dictionary"))
             {
                 typedData.TypeVal = RpcDataType.String;
                 typedData.StringVal = JObject.FromObject(scriptExecutionContextValue).ToString();
             }
+            else if (scriptExecutionContextValue.GetType() == typeof(string) || scriptExecutionContextValue.GetType() == typeof(int))
+            {
+                typedData.TypeVal = RpcDataType.String;
+                typedData.StringVal = scriptExecutionContextValue.ToString();
+            }
             else if (scriptExecutionContextValue.GetType().FullName.Contains("ExpandoObject"))
             {
                 typedData.TypeVal = RpcDataType.String;
-                typedData.StringVal = Newtonsoft.Json.JsonConvert.SerializeObject(scriptExecutionContextValue);
+                typedData.StringVal = JsonConvert.SerializeObject(scriptExecutionContextValue);
             }
             else if (scriptExecutionContextValue.GetType().FullName.Contains("Newtonsoft.Json.Linq.JObject"))
             {

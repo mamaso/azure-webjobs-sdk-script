@@ -4,11 +4,10 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Azure.WebJobs.Script.Description;
-using Microsoft.Azure.WebJobs.Script.Rpc;
 using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
 using RpcDataType = Microsoft.Azure.WebJobs.Script.Rpc.Messages.TypedData.Types.Type;
 
-namespace Microsoft.Azure.WebJobs.Script.Dispatch
+namespace Microsoft.Azure.WebJobs.Script.Rpc
 {
     public static class RpcMessageConversionExtensions
     {
@@ -59,6 +58,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
                             RpcHttp httpRequest = Utilities.BuildRpcHttpMessage((Dictionary<string, object>)item.Key);
                             typedData.TypeVal = RpcDataType.Http;
                             typedData.HttpVal = httpRequest;
+                            parameterBinding.Data = typedData;
                         }
                         else if (item.Key != null)
                         {

@@ -22,6 +22,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
         private readonly LanguageWorkerConfig _workerConfig;
         private readonly ScriptHostConfiguration _scriptConfig;
         private readonly TraceWriter _logger;
+        private TraceWriter _userTraceWriter;
         private Process _process;
         private IObservable<ChannelContext> _connections;
         private ChannelContext _context;
@@ -36,6 +37,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
 
         public async Task<object> InvokeAsync(Dictionary<string, object> scriptExecutionContext)
         {
+            _userTraceWriter = (TraceWriter)scriptExecutionContext["traceWriter"];
             InvocationRequest invocationRequest = scriptExecutionContext.ToRpcInvocationRequest();
             object result = null;
             InvocationResponse invocationResponse = await _context.SendAsync<InvocationRequest, InvocationResponse>(invocationRequest);
@@ -125,7 +127,9 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
                     {
                         // TODO Initialize SystemTraceWriter
                          TraceLevel level = (TraceLevel)System.Enum.Parse(typeof(TraceLevel), logData["lvl"].ToString());
-                         _logger.Trace(new TraceEvent(level, message));
+
+                        // _logger.Trace(new TraceEvent(level, message));
+                         _userTraceWriter.Trace(new TraceEvent(level, message));
                     }
                     catch (ObjectDisposedException)
                     {
