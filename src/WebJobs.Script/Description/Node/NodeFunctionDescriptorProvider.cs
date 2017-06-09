@@ -42,10 +42,11 @@ namespace Microsoft.Azure.WebJobs.Script.Description
 
         protected override IFunctionInvoker CreateFunctionInvoker(string scriptFilePath, BindingMetadata triggerMetadata, FunctionMetadata functionMetadata, Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings)
         {
-            // ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
-            // return new NodeFunctionInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
+             ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
 
-            return new NodeLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
+            // return new NodeFunctionInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings, compilationService);
+
+             return new NodeLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings, compilationService);
         }
     }
 }

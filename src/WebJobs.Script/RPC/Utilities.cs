@@ -263,16 +263,8 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
             if (scriptExecutionContextValue == null)
             {
                 return typedData;
-
-                // return null;
             }
 
-            // if (key == "req" || key == "request" || key == "webhookReq")
-            // {
-            //    RpcHttp httpRequest = BuildRpcHttpMessage((Dictionary<string, object>)item.Key);
-            //    typedData.TypeVal = RpcDataType.Http;
-            //    typedData.HttpVal = httpRequest;
-            // }
             if (scriptExecutionContextValue.GetType().FullName.Contains("Byte"))
             {
                 typedData.TypeVal = RpcDataType.Bytes;
@@ -305,7 +297,9 @@ namespace Microsoft.Azure.WebJobs.Script.Rpc
             }
             else
             {
-                throw new InvalidOperationException("did not find item type: " + scriptExecutionContextValue.GetType().FullName);
+                // throw new InvalidOperationException("did not find item type: " + scriptExecutionContextValue.GetType().FullName);
+                typedData.TypeVal = RpcDataType.String;
+                typedData.StringVal = scriptExecutionContextValue.ToString();
             }
             return typedData;
         }
