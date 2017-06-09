@@ -561,7 +561,6 @@
     <Compile Include="Host\IScriptHostFactory.cs" />
     <Compile Include="Diagnostics\NullTraceWriter.cs" />
     <Compile Include="IO\AutoRecoveringFileSystemWatcher.cs" />
-    <Compile Include="Description\LanguageFunctionInvokerBase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Config\ScriptHostConfiguration.cs" />
     <Compile Include="Config\TypeLocator.cs" />
@@ -572,10 +571,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyHelper.cs" />
-    <Compile Include="Rpc\IRpc.cs" />
-    <Compile Include="Rpc\IRpcFactory.cs" />
-    <Compile Include="Rpc\RpcConstants.cs" />
-    <Compile Include="Rpc\RpcFactory.cs" />
     <Compile Include="Rpc\Eventing\RpcMessageEvent.cs" />
     <Compile Include="Rpc\Eventing\RpcMessageReceivedEventArgs.cs" />
     <Compile Include="Rpc\Eventing\RpcRequestStreamEventSource.cs" />
