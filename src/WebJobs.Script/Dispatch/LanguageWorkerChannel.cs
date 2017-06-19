@@ -53,7 +53,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             {
                 foreach (ParameterBinding outputParameterBinding in invocationResponse.OutputData)
                 {
-                    object objValue = Utilities.ConvertTypedDataToObject(outputParameterBinding.Data);
+                    object objValue = outputParameterBinding.Data.FromRpcTypedDataToObject();
                     if (outputParameterBinding.Name == "$return")
                     {
                         result = objValue;
