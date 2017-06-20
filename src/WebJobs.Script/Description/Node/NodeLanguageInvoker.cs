@@ -424,12 +424,25 @@ namespace Microsoft.Azure.WebJobs.Script.Description
 
         internal static bool IsEdgeSupportedType(Type type)
         {
-            if (type == typeof(int) ||
-                type == typeof(double) ||
+            if (type.IsArray)
+            {
+                type = type.GetElementType();
+            }
+
+            if (Utility.IsNullable(type))
+            {
+                type = Nullable.GetUnderlyingType(type);
+            }
+
+            // these are types that we can safely pass directly
+            // to Edge
+            if (type.IsPrimitive ||
+                type.IsEnum ||
                 type == typeof(string) ||
-                type == typeof(bool) ||
-                type == typeof(byte[]) ||
-                type == typeof(object[]))
+                type == typeof(object) ||
+                type == typeof(DateTime) ||
+                type == typeof(DateTimeOffset) ||
+                type == typeof(Uri))
             {
                 return true;
             }
