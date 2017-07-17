@@ -461,6 +461,8 @@
     <Compile Include="Description\FunctionInvocationContext.cs" />
     <Compile Include="Description\FunctionLoader.cs" />
     <Compile Include="Description\ILanguageInvoker.cs" />
+    <Compile Include="Description\Java\JavaFunctionDescriptorProvider.cs" />
+    <Compile Include="Description\Java\JavaLanguageInvoker.cs" />
     <Compile Include="Description\LogTargets.cs" />
     <Compile Include="Description\Node\Compilation\ConditionalJavaScriptCompilationService.cs" />
     <Compile Include="Description\Node\Compilation\IJavaScriptCompilation.cs" />
@@ -519,6 +521,7 @@
     <Compile Include="Dispatch\FunctionDispatcher.cs" />
     <Compile Include="Dispatch\IFunctionDispatcher.cs" />
     <Compile Include="Dispatch\ILanguageWorkerChannel.cs" />
+    <Compile Include="Dispatch\JavaLanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
