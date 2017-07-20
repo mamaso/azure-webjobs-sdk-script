@@ -574,10 +574,6 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyHelper.cs" />
-    <Compile Include="Rpc\Eventing\RpcMessageEvent.cs" />
-    <Compile Include="Rpc\Eventing\RpcMessageReceivedEventArgs.cs" />
-    <Compile Include="Rpc\Eventing\RpcRequestStreamEventSource.cs" />
-    <Compile Include="Rpc\Eventing\RpcRequestStreamWatcher.cs" />
     <Compile Include="Rpc\Utilities.cs" />
     <Compile Include="ScriptConstants.cs" />
     <Compile Include="Config\ScriptSettingsManager.cs" />
