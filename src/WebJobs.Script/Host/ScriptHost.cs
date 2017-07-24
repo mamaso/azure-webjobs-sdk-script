@@ -1541,7 +1541,7 @@ namespace Microsoft.Azure.WebJobs.Script
                 _fileEventSource?.Dispose();
                 _debugModeFileWatcher?.Dispose();
                 _blobLeaseManager?.Dispose();
-                FunctionDispatcher?.Dispose();
+                _functionDispatcher?.Dispose();
 
                 foreach (var function in Functions)
                 {
