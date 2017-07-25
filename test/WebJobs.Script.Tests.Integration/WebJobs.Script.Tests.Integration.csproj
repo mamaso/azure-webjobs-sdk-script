@@ -390,6 +390,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ApiHubTestHelper.cs" />
+    <Compile Include="JavaEndToEndTests.cs" />
+    <Compile Include="LanguageWorkerEndToEndTestsBase.cs" />
     <Compile Include="Controllers\ControllerDisabledAuthScenarioTestsFixture.cs" />
     <Compile Include="Controllers\Keys\DeleteFunctionKeysScenario.cs" />
     <Compile Include="Controllers\Keys\DeleteHostSystemKeysScenario.cs" />
@@ -1194,6 +1196,9 @@
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\Newtonsoft.Json.dll" />
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.CodeFixes.dll" />
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="TestScripts\Java\" />
   </ItemGroup>
   <Import Project="..\WebJobs.Script.Tests.Shared\WebJobs.Script.Tests.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
