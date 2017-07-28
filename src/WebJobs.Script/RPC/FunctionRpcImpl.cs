@@ -2,48 +2,43 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Reactive.Subjects;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
+using Microsoft.Azure.WebJobs.Script.Eventing;
 using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 
 namespace Microsoft.Azure.WebJobs.Script
 {
-    internal class FunctionRpcImpl : FunctionRpc.FunctionRpcBase, IDisposable
+    internal class FunctionRpcImpl : FunctionRpc.FunctionRpcBase
     {
-        private Subject<ChannelContext> _connections = new Subject<ChannelContext>();
+        private readonly IScriptEventManager _eventManager;
 
-        public IObservable<ChannelContext> Connections => _connections;
-
-        public void Dispose()
+        public FunctionRpcImpl(IScriptEventManager eventManager)
         {
-            _connections.Dispose();
+            _eventManager = eventManager;
         }
 
         public override async Task EventStream(IAsyncStreamReader<StreamingMessage> requestStream, IServerStreamWriter<StreamingMessage> responseStream, ServerCallContext context)
         {
-            var input = new Subject<StreamingMessage>();
-            var output = new Subject<StreamingMessage>();
-
-            while (await requestStream.MoveNext(CancellationToken.None))
+            if (await requestStream.MoveNext(CancellationToken.None))
             {
-                if (requestStream.Current.ContentCase == StreamingMessage.ContentOneofCase.StartStream)
-                {
-                    // TODO Worker start Async needs to wait for the startStream message before it completes the task
-                    var startStream = requestStream.Current.StartStream;
+                string workerId = requestStream.Current.StartStream.WorkerId;
+                _eventManager.OfType<RpcEvent>()
+                    .Where(evt => evt.Origin == RpcEvent.MessageOrigin.Host && evt.WorkerId == workerId)
 
-                    output.Subscribe(msg => responseStream.WriteAsync(msg));
-
-                    _connections.OnNext(new ChannelContext
+                    // TODO: correctly handle async writes?
+                    .Subscribe(evt =>
                     {
-                        WorkerId = startStream.WorkerId,
-                        RequestId = requestStream.Current.RequestId,
-                        InputStream = input,
-                        OutputStream = output
+                        responseStream.WriteAsync(evt.Message);
                     });
+
+                do
+                {
+                    _eventManager.Publish(new RpcEvent(workerId, requestStream.Current, RpcEvent.MessageOrigin.Worker));
                 }
-                input.OnNext(requestStream.Current);
+                while (await requestStream.MoveNext(CancellationToken.None));
             }
         }
     }

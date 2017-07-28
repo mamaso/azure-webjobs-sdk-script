@@ -12,16 +12,21 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Script.Binding;
 using Microsoft.Azure.WebJobs.Script.Diagnostics;
+using Microsoft.Azure.WebJobs.Script.Eventing;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Scripting;
+using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
+using MsgType = Microsoft.Azure.WebJobs.Script.Grpc.Messages.StreamingMessage.ContentOneofCase;
 
 namespace Microsoft.Azure.WebJobs.Script.Description
 {
@@ -94,24 +99,84 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             return null;
         }
 
+        private static Action<RpcEvent> CreateLogHandler(TraceWriter userTraceWriter)
+        {
+            return (rpcEvent) =>
+            {
+                var logMessage = rpcEvent.Message.RpcLog;
+
+                // TODO get rest of the properties from log message
+                string message = logMessage.Message;
+                if (message != null)
+                {
+                    try
+                    {
+                        // TODO Initialize SystemTraceWriter
+                        LogLevel logLevel = (LogLevel)logMessage.Level;
+                        TraceLevel level = TraceLevel.Off;
+                        switch (logLevel)
+                        {
+                            case LogLevel.Critical:
+                            case LogLevel.Error:
+                                level = TraceLevel.Error;
+                                break;
+
+                            case LogLevel.Trace:
+                            case LogLevel.Debug:
+                                level = TraceLevel.Verbose;
+                                break;
+
+                            case LogLevel.Information:
+                                level = TraceLevel.Info;
+                                break;
+
+                            case LogLevel.Warning:
+                                level = TraceLevel.Warning;
+                                break;
+
+                            default:
+                                break;
+                        }
+
+                        // _logger.Trace(new TraceEvent(level, message));
+                        userTraceWriter.Trace(new TraceEvent(level, message));
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // if a function attempts to write to a disposed
+                        // TraceWriter. Might happen if a function tries to
+                        // log after calling done()
+                    }
+                }
+            };
+        }
+
         protected override async Task InvokeCore(object[] parameters, FunctionInvocationContext context)
         {
             // Ensure we're properly initialized
             // await _initializer.Value.ConfigureAwait(false);
-
             object input = parameters[0];
             string invocationId = context.ExecutionContext.InvocationId.ToString();
             DataType dataType = _trigger.DataType ?? DataType.String;
 
             var userTraceWriter = CreateUserTraceWriter(context.TraceWriter);
+            var logHandler = CreateLogHandler(userTraceWriter);
+            var logSubscription = Host.EventManager
+                .OfType<RpcEvent>()
+                .Where(evt => evt.MessageType == MsgType.RpcLog && evt.Message.RpcLog.InvocationId == invocationId)
+                .Subscribe(logHandler);
+
             var scriptExecutionContext = await CreateScriptExecutionContextAsync(input, dataType, userTraceWriter, context).ConfigureAwait(false);
             var bindingData = (Dictionary<string, object>)scriptExecutionContext["bindingData"];
 
-            scriptExecutionContext["traceWriter"] = userTraceWriter;
             scriptExecutionContext["invocationId"] = context.ExecutionContext.InvocationId.ToString();
             await ProcessInputBindingsAsync(context.Binder, scriptExecutionContext, bindingData);
 
-            object functionResult = await Host.FunctionDispatcher.InvokeAsync(Metadata, scriptExecutionContext);
+            object functionResult;
+            using (logSubscription)
+            {
+                functionResult = await Host.FunctionDispatcher.InvokeAsync(Metadata, scriptExecutionContext);
+            }
 
             await ProcessOutputBindingsAsync(_outputBindings, input, context.Binder, bindingData, scriptExecutionContext, functionResult);
         }

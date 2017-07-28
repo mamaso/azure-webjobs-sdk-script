@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
+using Microsoft.Azure.WebJobs.Script.Rpc;
 
 namespace Microsoft.Azure.WebJobs.Script
 {
@@ -36,12 +37,7 @@ namespace Microsoft.Azure.WebJobs.Script
                 InvocationRequest = request
             }, TimeSpan.FromMinutes(5))).InvocationResponse;
 
-            var result = response.Result;
-            if (response.Result.Status == StatusResult.Types.Status.Failure)
-            {
-                var exc = response.Result.Exception;
-                throw new InvalidOperationException($"{exc.Message}\n{exc.StackTrace}");
-            }
+            response.Result.VerifySuccess();
             return response;
         }
 

@@ -513,8 +513,11 @@
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
+    <Compile Include="Dispatch\WorkerContext.cs" />
+    <Compile Include="Eventing\RpcEvent.cs" />
     <Compile Include="Rpc\ChannelContext.cs" />
     <Compile Include="Rpc\FunctionRpcImpl.cs" />
+    <Compile Include="Rpc\RpcException.cs" />
     <Compile Include="Rpc\RpcMessageConversionExtensions.cs" />
     <Compile Include="EnvironmentSettingNames.cs" />
     <Compile Include="ErrorCodes.cs" />
@@ -564,6 +567,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="PropertyHelper.cs" />
+    <Compile Include="Rpc\StatusResultExtensions.cs" />
     <Compile Include="Rpc\Utilities.cs" />
     <Compile Include="ScriptConstants.cs" />
     <Compile Include="Config\ScriptSettingsManager.cs" />

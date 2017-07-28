@@ -36,7 +36,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             _eventManager = manager;
             _logger = logger;
 
-            _serverImpl = new FunctionRpcImpl();
+            _serverImpl = new FunctionRpcImpl(_eventManager);
             _server = new GrpcServer(_serverImpl);
 
             _server.Start();
@@ -90,7 +90,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             {
                 foreach (var workerConfig in workerConfigs)
                 {
-                    var worker = new LanguageWorkerChannel(_scriptConfig, workerConfig, _logger, _serverImpl.Connections, _server.BoundPort);
+                    var worker = new LanguageWorkerChannel(_scriptConfig, _eventManager, workerConfig, _logger, _server.BoundPort);
                     _workers.Add(worker);
 
                     foreach (var scriptType in workerConfig.SupportedScriptTypes)
@@ -119,7 +119,6 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             {
                 worker.Dispose();
             }
-            _serverImpl.Dispose();
         }
     }
 }
