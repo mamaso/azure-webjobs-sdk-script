@@ -2,29 +2,25 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Grpc.Core;
-using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
-using System.Linq;
+using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 
-namespace Microsoft.Azure.WebJobs.Script.Rpc
+namespace Microsoft.Azure.WebJobs.Script.Grpc
 { 
     public class GrpcServer
     {
         private Server _server;
-        private FunctionRpcImpl _serverImpl;
 
-        public GrpcServer()
+        public GrpcServer(FunctionRpc.FunctionRpcBase serviceImpl)
         {
-            _serverImpl = new FunctionRpcImpl();
             _server = new Server
             {
-                Services = { FunctionRpc.BindService(_serverImpl) },
+                Services = { FunctionRpc.BindService(serviceImpl) },
                 Ports = { new ServerPort("127.0.0.1", ServerPort.PickUnused, ServerCredentials.Insecure) }
             };
         }
-
-        public IObservable<ChannelContext> Connections => _serverImpl.Connections;
 
         public void Start() => _server.Start();
 

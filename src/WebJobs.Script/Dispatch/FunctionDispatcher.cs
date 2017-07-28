@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Script.Description;
 using Microsoft.Azure.WebJobs.Script.Eventing;
-using Microsoft.Azure.WebJobs.Script.Rpc;
+using Microsoft.Azure.WebJobs.Script.Grpc;
 
 using WorkerPool = System.Collections.Generic.ICollection
     <Microsoft.Azure.WebJobs.Script.Dispatch.ILanguageWorkerChannel>;
@@ -28,6 +28,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
 
         // TODO: handle dead connections https://news.ycombinator.com/item?id=12345223
         private GrpcServer _server;
+        private FunctionRpcImpl _serverImpl;
 
         public FunctionDispatcher(ScriptHostConfiguration scriptConfig, IScriptEventManager manager, TraceWriter logger)
         {
@@ -35,7 +36,8 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             _eventManager = manager;
             _logger = logger;
 
-            _server = new GrpcServer();
+            _serverImpl = new FunctionRpcImpl();
+            _server = new GrpcServer(_serverImpl);
 
             _server.Start();
 
@@ -88,7 +90,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             {
                 foreach (var workerConfig in workerConfigs)
                 {
-                    var worker = new LanguageWorkerChannel(_scriptConfig, workerConfig, _logger, _server);
+                    var worker = new LanguageWorkerChannel(_scriptConfig, workerConfig, _logger, _serverImpl.Connections, _server.BoundPort);
                     _workers.Add(worker);
 
                     foreach (var scriptType in workerConfig.SupportedScriptTypes)
@@ -117,6 +119,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             {
                 worker.Dispose();
             }
+            _serverImpl.Dispose();
         }
     }
 }

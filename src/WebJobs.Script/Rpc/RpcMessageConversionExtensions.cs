@@ -7,13 +7,13 @@ using System.Dynamic;
 using System.Linq;
 using Google.Protobuf;
 using Microsoft.Azure.WebJobs.Script.Description;
-using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
+using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
-using RpcDataType = Microsoft.Azure.WebJobs.Script.Rpc.Messages.TypedData.DataOneofCase;
+using RpcDataType = Microsoft.Azure.WebJobs.Script.Grpc.Messages.TypedData.DataOneofCase;
 
-namespace Microsoft.Azure.WebJobs.Script.Rpc
+namespace Microsoft.Azure.WebJobs.Script
 {
     public static class RpcMessageConversionExtensions
     {

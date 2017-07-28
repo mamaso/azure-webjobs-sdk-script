@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
-using Google.Protobuf.WellKnownTypes;
-using Google.Protobuf;
-using System.Reactive.Linq;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
-namespace Microsoft.Azure.WebJobs.Script.Rpc
+using System;
+using System.Linq;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
+
+namespace Microsoft.Azure.WebJobs.Script
 {
     public class ChannelContext
     {

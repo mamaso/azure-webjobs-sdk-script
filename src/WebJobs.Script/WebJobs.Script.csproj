@@ -513,6 +513,8 @@
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
+    <Compile Include="Rpc\ChannelContext.cs" />
+    <Compile Include="Rpc\FunctionRpcImpl.cs" />
     <Compile Include="Rpc\RpcMessageConversionExtensions.cs" />
     <Compile Include="EnvironmentSettingNames.cs" />
     <Compile Include="ErrorCodes.cs" />
@@ -651,12 +653,11 @@
     <Analyzer Include="..\..\packages\StyleCop.Analyzers.1.1.0-beta001\analyzers\dotnet\cs\StyleCop.Analyzers.dll" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\WebJobs.Script.Rpc\WebJobs.Script.Rpc.csproj">
+    <ProjectReference Include="..\WebJobs.Script.Grpc\WebJobs.Script.Grpc.csproj">
       <Project>{bd2a18b5-51c1-4b5c-998b-9df75007d7a7}</Project>
-      <Name>WebJobs.Script.Rpc</Name>
+      <Name>WebJobs.Script.Grpc</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!--  <Import Project="..\..\packages\StyleCop.MSBuild.4.7.50.0\build\StyleCop.MSBuild.Targets" Condition="Exists('..\..\packages\StyleCop.MSBuild.4.7.50.0\build\StyleCop.MSBuild.Targets')" /> -->
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

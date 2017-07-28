@@ -9,9 +9,9 @@ using System.Net;
 using System.Net.Sockets;
 using Google.Protobuf.Collections;
 using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
+using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 
-namespace Microsoft.Azure.WebJobs.Script.Rpc
+namespace Microsoft.Azure.WebJobs.Script
 {
     public static class Utilities
     {

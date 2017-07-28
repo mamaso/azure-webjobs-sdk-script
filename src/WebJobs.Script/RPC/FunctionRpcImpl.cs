@@ -1,17 +1,25 @@
-﻿using System;
+﻿// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
-using System.Reactive.Subjects;
-using Microsoft.Azure.WebJobs.Script.Rpc.Messages;
+using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 
-namespace Microsoft.Azure.WebJobs.Script.Rpc
+namespace Microsoft.Azure.WebJobs.Script
 {
-    internal class FunctionRpcImpl : FunctionRpc.FunctionRpcBase
+    internal class FunctionRpcImpl : FunctionRpc.FunctionRpcBase, IDisposable
     {
         private Subject<ChannelContext> _connections = new Subject<ChannelContext>();
 
         public IObservable<ChannelContext> Connections => _connections;
+
+        public void Dispose()
+        {
+            _connections.Dispose();
+        }
 
         public override async Task EventStream(IAsyncStreamReader<StreamingMessage> requestStream, IServerStreamWriter<StreamingMessage> responseStream, ServerCallContext context)
         {
