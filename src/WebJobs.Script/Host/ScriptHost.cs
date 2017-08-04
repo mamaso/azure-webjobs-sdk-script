@@ -421,10 +421,6 @@ namespace Microsoft.Azure.WebJobs.Script
                     }
                 }
 
-                // Load builtin extensions
-                var sendGridExtension = new Extensions.SendGrid.SendGridConfiguration();
-                LoadExtension(sendGridExtension);
-
                 LoadCustomExtensions();
 
                 // Create the lease manager that will keep handle the primary host blob lease acquisition and renewal
@@ -1046,7 +1042,9 @@ namespace Microsoft.Azure.WebJobs.Script
 #if FEATURE_POWERSHELL
                     new PowerShellFunctionDescriptorProvider(this, ScriptConfig),
 #endif
-                    new JavaFunctionDescriptorProvider(this, ScriptConfig)
+#if FEATURE_JAVA
+                new JavaFunctionDescriptorProvider(this, ScriptConfig)
+#endif
                 };
 
             return GetFunctionDescriptors(functions, descriptorProviders);

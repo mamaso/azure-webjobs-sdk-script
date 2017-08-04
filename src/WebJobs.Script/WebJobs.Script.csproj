@@ -449,8 +449,6 @@
     <Compile Include="Description\FunctionInvocationContext.cs" />
     <Compile Include="Description\FunctionLoader.cs" />
     <Compile Include="Description\ILanguageInvoker.cs" />
-    <Compile Include="Description\Java\JavaFunctionDescriptorProvider.cs" />
-    <Compile Include="Description\Java\JavaLanguageInvoker.cs" />
     <Compile Include="Description\LogTargets.cs" />
     <Compile Include="Description\Node\Compilation\ConditionalJavaScriptCompilationService.cs" />
     <Compile Include="Description\Node\Compilation\IJavaScriptCompilation.cs" />
@@ -471,6 +469,8 @@
     <Compile Include="Description\PackageRestoreResult.cs" />
     <Compile Include="Description\ScriptFunctionInvokerBase.cs" />
     <Compile Include="Description\DotNet\Compilation\FSharp\FSharpCompilation.cs" />
+    <Compile Include="Description\Script\ScriptInvocationContext.cs" />
+    <Compile Include="Description\Script\ScriptInvocationResult.cs" />
     <Compile Include="Diagnostics\ApplicationPerformanceCounters.cs" />
     <Compile Include="Diagnostics\CompositeTraceWriter.cs" />
     <Compile Include="Description\Binding\BindingDirection.cs" />
@@ -513,8 +513,9 @@
     <Compile Include="Dispatch\LanguageWorkerChannel.cs" />
     <Compile Include="Dispatch\LanguageWorkerConfig.cs" />
     <Compile Include="Dispatch\NodeLanguageWorkerConfig.cs" />
-    <Compile Include="Dispatch\WorkerContext.cs" />
+    <Compile Include="Dispatch\WorkerInfo.cs" />
     <Compile Include="Eventing\RpcEvent.cs" />
+    <Compile Include="Extensions\LogLevelExtensions.cs" />
     <Compile Include="Rpc\ChannelContext.cs" />
     <Compile Include="Rpc\FunctionRpcImpl.cs" />
     <Compile Include="Rpc\RpcException.cs" />

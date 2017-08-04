@@ -59,16 +59,6 @@ namespace Microsoft.Azure.WebJobs.Script
             return endPointAvailable;
         }
 
-        public static MapField<string, TypedData> GetMetadataFromDictionary(Dictionary<string, object> scriptExecutionContextDictionary)
-        {
-            MapField<string, TypedData> itemsDictionary = new MapField<string, TypedData>();
-            foreach (var item in scriptExecutionContextDictionary)
-            {
-                itemsDictionary.Add(item.Key, item.Value.ToRpcTypedData());
-            }
-            return itemsDictionary;
-        }
-
         public static object ConvertFromHttpMessageToExpando(RpcHttp inputMessage)
         {
             if (inputMessage == null)
@@ -85,7 +75,7 @@ namespace Microsoft.Azure.WebJobs.Script
 
             if (inputMessage.Body != null)
             {
-                expando.body = inputMessage.Body.FromRpcTypedDataToObject(true);
+                expando.body = inputMessage.Body.ToObject();
             }
             return expando;
         }

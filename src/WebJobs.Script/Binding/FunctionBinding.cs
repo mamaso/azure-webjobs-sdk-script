@@ -108,6 +108,11 @@ namespace Microsoft.Azure.WebJobs.Script.Binding
         {
             IEnumerable values = null;
 
+            if (value is JArray jArray)
+            {
+                return jArray;
+            }
+
             if (value is Stream)
             {
                 // first deserialize the stream as a string

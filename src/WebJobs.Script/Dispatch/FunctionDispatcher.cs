@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Script.Description;
+using Microsoft.Azure.WebJobs.Script.Description.Script;
 using Microsoft.Azure.WebJobs.Script.Eventing;
 using Microsoft.Azure.WebJobs.Script.Grpc;
 
@@ -72,9 +73,9 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             GetWorker(functionMetadata).LoadAsync(functionMetadata);
         }
 
-        public Task<object> InvokeAsync(FunctionMetadata functionMetadata, Dictionary<string, object> scriptExecutionContext)
+        public Task<ScriptInvocationResult> InvokeAsync(FunctionMetadata functionMetadata, ScriptInvocationContext context)
         {
-            return GetWorker(functionMetadata).InvokeAsync(functionMetadata, scriptExecutionContext);
+            return GetWorker(functionMetadata).InvokeAsync(functionMetadata, context);
         }
 
         public async Task ShutdownAsync()

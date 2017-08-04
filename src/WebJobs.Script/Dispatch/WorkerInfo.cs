@@ -5,9 +5,9 @@ using System.Collections.Generic;
 
 namespace Microsoft.Azure.WebJobs.Script.Dispatch
 {
-    internal class WorkerContext
+    internal class WorkerInfo
     {
-        public WorkerContext(string id, string version, IDictionary<string, string> capabilites)
+        public WorkerInfo(string id, string version, IDictionary<string, string> capabilites)
         {
             Id = id;
             Version = version;

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.ObjectModel;
 using Microsoft.Azure.WebJobs.Script.Binding;
+using Microsoft.Azure.WebJobs.Script.Config;
 
 namespace Microsoft.Azure.WebJobs.Script.Description
 {
@@ -42,11 +43,16 @@ namespace Microsoft.Azure.WebJobs.Script.Description
 
         protected override IFunctionInvoker CreateFunctionInvoker(string scriptFilePath, BindingMetadata triggerMetadata, FunctionMetadata functionMetadata, Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings)
         {
-             ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
+            ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
 
-            // return new NodeFunctionInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings, compilationService);
-
-             return new NodeLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings, compilationService);
+            if (ScriptSettingsManager.Instance.GetSetting("USE_EDGE") != null)
+            {
+                return new NodeFunctionInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings, compilationService);
+            }
+            else
+            {
+                return new NodeLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
+            }
         }
     }
 }

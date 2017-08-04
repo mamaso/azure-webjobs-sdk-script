@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Description;
+using Microsoft.Azure.WebJobs.Script.Description.Script;
 
 namespace Microsoft.Azure.WebJobs.Script.Dispatch
 {
@@ -22,7 +23,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
 
         // invoke a function
         // could use delay loading for start worker / load fucntion
-        Task<object> InvokeAsync(FunctionMetadata functionMetadata, Dictionary<string, object> scriptExecutionContext);
+        Task<ScriptInvocationResult> InvokeAsync(FunctionMetadata functionMetadata, ScriptInvocationContext context);
 
         Task ShutdownAsync();
     }

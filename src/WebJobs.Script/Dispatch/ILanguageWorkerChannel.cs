@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Description;
+using Microsoft.Azure.WebJobs.Script.Description.Script;
 
 namespace Microsoft.Azure.WebJobs.Script.Dispatch
 {
@@ -22,6 +23,6 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
 
         void LoadAsync(FunctionMetadata functionMetadata);
 
-        Task<object> InvokeAsync(FunctionMetadata functionMetadata, Dictionary<string, object> scriptExecutionContext);
+        Task<ScriptInvocationResult> InvokeAsync(FunctionMetadata functionMetadata, ScriptInvocationContext invokeContext);
     }
 }

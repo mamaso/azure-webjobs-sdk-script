@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Host;
 using Microsoft.Azure.WebJobs.Script.Description;
+using Microsoft.Azure.WebJobs.Script.Description.Script;
 using Microsoft.Azure.WebJobs.Script.Eventing;
 using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 using Microsoft.Azure.WebJobs.Script.Rpc;
@@ -34,7 +35,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
         private IDictionary<FunctionMetadata, Task<FunctionLoadResponse>> _functionLoadState = new Dictionary<FunctionMetadata, Task<FunctionLoadResponse>>();
         private int _port;
 
-        private AsyncLazy<WorkerContext> _workerContext;
+        private AsyncLazy<WorkerInfo> _workerInfo;
 
         public LanguageWorkerChannel(ScriptHostConfiguration scriptConfig, IScriptEventManager eventManager, LanguageWorkerConfig workerConfig, TraceWriter logger, int port)
         {
@@ -43,12 +44,12 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             _workerConfig = workerConfig;
             _logger = logger;
             _port = port;
-            _workerContext = new AsyncLazy<WorkerContext>((ct) => StartWorkerAsync(), new CancellationTokenSource());
+            _workerInfo = new AsyncLazy<WorkerInfo>((ct) => StartWorkerAsync(), new CancellationTokenSource());
         }
 
         private async Task SendAsync(StreamingMessage msg, string workerId = null)
         {
-            workerId = workerId ?? (await _workerContext).Id;
+            workerId = workerId ?? (await _workerInfo).Id;
             var msgEvent = new RpcEvent(workerId, msg);
             _eventManager.Publish(msgEvent);
         }
@@ -82,14 +83,30 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             return await receiveTask;
         }
 
-        public async Task<object> InvokeAsync(FunctionMetadata functionMetadata, Dictionary<string, object> scriptExecutionContext)
+        public async Task<ScriptInvocationResult> InvokeAsync(FunctionMetadata functionMetadata, ScriptInvocationContext context)
         {
             FunctionLoadResponse loadResponse = await _functionLoadState.GetOrAdd(functionMetadata, metadata => LoadInternalAsync(metadata));
 
-            scriptExecutionContext.Add("functionId", functionMetadata.FunctionId);
-            InvocationRequest invocationRequest = scriptExecutionContext.ToRpcInvocationRequest();
+            InvocationRequest invocationRequest = new InvocationRequest()
+            {
+                FunctionId = loadResponse.FunctionId,
+                InvocationId = context.ExecutionContext.InvocationId.ToString(),
+            };
 
-            object result = null;
+            foreach (var pair in context.BindingData)
+            {
+                invocationRequest.TriggerMetadata.Add(pair.Key, await pair.Value.ToRpcAsync().ConfigureAwait(false));
+            }
+
+            foreach (var input in context.Inputs)
+            {
+                invocationRequest.InputData.Add(new ParameterBinding()
+                {
+                    Name = input.name,
+                    Data = await input.val.ToRpcAsync().ConfigureAwait(false)
+                });
+            }
+
             var response = await ReqResAsync(new StreamingMessage()
             {
                 InvocationRequest = invocationRequest
@@ -97,43 +114,53 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             InvocationResponse invocationResponse = response.InvocationResponse;
             invocationResponse.Result.VerifySuccess();
 
-            Dictionary<string, object> itemsDictionary = new Dictionary<string, object>();
-            if (invocationResponse.OutputData?.Count > 0)
+            IDictionary<string, object> bindingsDictionary = invocationResponse.OutputData
+                    .ToDictionary(binding => binding.Name, binding => binding.Data.ToObject());
+
+            return new ScriptInvocationResult()
             {
-                foreach (ParameterBinding outputParameterBinding in invocationResponse.OutputData)
-                {
-                    object objValue = outputParameterBinding.Data.FromRpcTypedDataToObject();
-                    if (outputParameterBinding.Name == "$return")
-                    {
-                        result = objValue;
-                    }
-                    else
-                    {
-                        itemsDictionary.Add(outputParameterBinding.Name, objValue);
-                    }
-                }
-            }
-            Dictionary<string, object> bindingsDictionary = (Dictionary<string, object>)scriptExecutionContext["bindings"];
-            bindingsDictionary.AddRange(itemsDictionary);
-            scriptExecutionContext["bindings"] = bindingsDictionary;
-            return result;
+                Outputs = bindingsDictionary,
+                Return = invocationResponse?.ReturnValue?.ToObject()
+            };
         }
 
         public async Task HandleFileEventAsync(FileSystemEventArgs fileEvent)
         {
-            // FileChangeEventRequest request = new FileChangeEventRequest();
-            // FileChangeEventResponse response = await _context.LoadAsync(request);
-            await Task.CompletedTask;
+            FileChangeEventRequest request = new FileChangeEventRequest()
+            {
+                FullPath = fileEvent.FullPath,
+                Name = fileEvent.Name,
+                Type = (FileChangeEventRequest.Types.Type)fileEvent.ChangeType
+            };
+
+            await SendAsync(new StreamingMessage()
+            {
+                FileChangeEventRequest = request,
+            });
         }
 
-        private async Task<FunctionLoadResponse> LoadInternalAsync(FunctionMetadata functionMetadata)
+        private async Task<FunctionLoadResponse> LoadInternalAsync(FunctionMetadata metadata)
         {
             FunctionLoadRequest request = new FunctionLoadRequest()
             {
                 FunctionId = Guid.NewGuid().ToString(),
-                Metadata = functionMetadata.ToRpcFunctionMetadata()
+                Metadata = new RpcFunctionMetadata()
+                {
+                    Name = metadata.Name,
+                    Directory = metadata.FunctionDirectory,
+                    EntryPoint = metadata.EntryPoint ?? string.Empty,
+                    ScriptFile = metadata.ScriptFile ?? string.Empty
+                }
             };
-            functionMetadata.FunctionId = request.FunctionId;
+
+            foreach (var binding in metadata.Bindings)
+            {
+                request.Metadata.Bindings.Add(binding.Name, new BindingInfo
+                {
+                    Direction = (BindingInfo.Types.Direction)binding.Direction,
+                    Type = binding.Type
+                });
+            }
 
             var response = await ReqResAsync(new StreamingMessage()
             {
@@ -144,14 +171,14 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             return response.FunctionLoadResponse;
         }
 
-        public async Task StartAsync() => await _workerContext.Value;
+        public async Task StartAsync() => await _workerInfo;
 
         public void LoadAsync(FunctionMetadata functionMetadata)
         {
             _functionLoadState[functionMetadata] = LoadInternalAsync(functionMetadata);
         }
 
-        internal async Task<WorkerContext> StartWorkerAsync()
+        internal async Task<WorkerInfo> StartWorkerAsync()
         {
             await StopAsync();
 
@@ -175,7 +202,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             WorkerInitResponse initResponse = response.WorkerInitResponse;
             initResponse.Result.VerifySuccess();
 
-            return new WorkerContext(workerId, initResponse.WorkerVersion, initResponse.Capabilities);
+            return new WorkerInfo(workerId, initResponse.WorkerVersion, initResponse.Capabilities);
         }
 
         internal async Task StartWorkerProcessAsync(LanguageWorkerConfig config, string workerId, string requestId)
@@ -240,7 +267,7 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
 
         public void Dispose()
         {
-            _workerContext.Dispose();
+            _workerInfo.Dispose();
             _process?.Kill();
             _process?.Dispose();
         }
