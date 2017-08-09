@@ -2,26 +2,20 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs.Script.Binding;
-using Microsoft.Azure.WebJobs.Script.Config;
 
 namespace Microsoft.Azure.WebJobs.Script.Description
 {
-    internal class NodeFunctionDescriptorProvider : FunctionDescriptorProvider
+    internal class JavaFunctionDescriptorProvider : FunctionDescriptorProvider
     {
-        private readonly ICompilationServiceFactory<ICompilationService<IJavaScriptCompilation>, FunctionMetadata> _compilationServiceFactory;
-
-        public NodeFunctionDescriptorProvider(ScriptHost host, ScriptHostConfiguration config)
-            : this(host, config, new JavaScriptCompilationServiceFactory(host))
-        {
-        }
-
-        public NodeFunctionDescriptorProvider(ScriptHost host, ScriptHostConfiguration config,
-            ICompilationServiceFactory<ICompilationService<IJavaScriptCompilation>, FunctionMetadata> compilationServiceFactory)
+        public JavaFunctionDescriptorProvider(ScriptHost host, ScriptHostConfiguration config)
             : base(host, config)
         {
-            _compilationServiceFactory = compilationServiceFactory;
         }
 
         public override bool TryCreate(FunctionMetadata functionMetadata, out FunctionDescriptor functionDescriptor)
@@ -32,7 +26,7 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             }
 
             // We can only handle script types supported by the current compilation service factory
-            if (!_compilationServiceFactory.SupportedScriptTypes.Contains(functionMetadata.ScriptType))
+            if (functionMetadata.ScriptType != ScriptType.JavaArchive)
             {
                 functionDescriptor = null;
                 return false;
@@ -43,9 +37,10 @@ namespace Microsoft.Azure.WebJobs.Script.Description
 
         protected override IFunctionInvoker CreateFunctionInvoker(string scriptFilePath, BindingMetadata triggerMetadata, FunctionMetadata functionMetadata, Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings)
         {
-            ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
+            // ICompilationService<IJavaScriptCompilation> compilationService = _compilationServiceFactory.CreateService(functionMetadata.ScriptType, functionMetadata);
+            // return new NodeFunctionInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
 
-            return new NodeLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
+            return new JavaLanguageInvoker(Host, triggerMetadata, functionMetadata, inputBindings, outputBindings);
         }
     }
 }

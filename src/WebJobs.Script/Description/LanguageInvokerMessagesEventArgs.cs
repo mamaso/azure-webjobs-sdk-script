@@ -7,11 +7,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Microsoft.Azure.WebJobs.Script.Eventing
+namespace Microsoft.Azure.WebJobs.Script.Description
 {
-    public static class EventSources
+    public class LanguageInvokerMessagesEventArgs : EventArgs
     {
-        public const string ScriptFiles = "ScriptFiles";
-        public const string Rpc = "Rpc";
+        public string Message { get; set; }
     }
 }
