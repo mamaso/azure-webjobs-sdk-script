@@ -35,9 +35,8 @@ namespace Microsoft.Azure.WebJobs.Script.Description
         private Func<Task> _reloadScript;
 
         internal JavaLanguageInvoker(ScriptHost host, BindingMetadata trigger, FunctionMetadata functionMetadata,
-            Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings,
-            ITraceWriterFactory traceWriterFactory = null)
-            : base(host, functionMetadata, traceWriterFactory)
+            Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings)
+            : base(host, functionMetadata)
         {
             _trigger = trigger;
             _inputBindings = inputBindings;
@@ -59,7 +58,7 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             string invocationId = context.ExecutionContext.InvocationId.ToString();
             DataType dataType = _trigger.DataType ?? DataType.String;
 
-            var userTraceWriter = CreateUserTraceWriter(context.TraceWriter);
+            var userTraceWriter = TraceWriter;
             var scriptExecutionContext = await CreateScriptExecutionContextAsync(input, dataType, userTraceWriter, context).ConfigureAwait(false);
             var bindingData = (Dictionary<string, object>)scriptExecutionContext["bindingData"];
 
@@ -213,7 +212,6 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             // _functionLoader.Reset();
             // _scriptFunc = null;
 
-            TraceOnPrimaryHost(string.Format(CultureInfo.InvariantCulture, "Script for function '{0}' changed. Reloading.", Metadata.Name), TraceLevel.Info);
             await Task.CompletedTask;
         }
 
@@ -400,7 +398,8 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             Dictionary<string, object> requestObject = new Dictionary<string, object>();
             requestObject["originalUrl"] = request.RequestUri.ToString();
             requestObject["method"] = request.Method.ToString().ToUpperInvariant();
-            requestObject["query"] = request.GetQueryParameterDictionary();
+
+            // requestObject["query"] = request.GetQueryParameterDictionary();
 
             // since HTTP headers are case insensitive, we lower-case the keys
             // as does Node.js request object

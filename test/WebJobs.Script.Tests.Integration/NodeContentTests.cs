@@ -15,6 +15,13 @@ using System.Web.Http;
 using Microsoft.Azure.WebJobs.Script.Config;
 using Microsoft.Azure.WebJobs.Script.WebHost;
 using Xunit;
+using Microsoft.WebJobs.Script.Tests;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
+using Microsoft.AspNetCore.Mvc;
+using System.Web.Http.Results;
+using Moq;
+using Microsoft.Azure.WebJobs.Script.Binding;
 
 namespace Microsoft.Azure.WebJobs.Script.Tests
 {
@@ -291,43 +298,21 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
 
         protected async Task<string> CreateTest<Req>(Req content, string contentType, bool isRaw, bool isReturn, string expectedContentType = null)
         {
-            HttpContent reqContent;
-            if (content is byte[])
-            {
-                reqContent = new ByteArrayContent(content as byte[]);
-                reqContent.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-            }
-            else if (content is string)
-            {
-                reqContent = new StringContent(content as string);
-            }
-            else
-            {
-                reqContent = new ObjectContent(typeof(Req), content, new JsonMediaTypeFormatter());
-                reqContent.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            IHeaderDictionary headers = new HeaderDictionary();
 
-                // spoof CreateRequestObject in NodeFunctionInvoker
-                reqContent.Headers.ContentLength = 1;
-            }
-
-            HttpRequestMessage request = new HttpRequestMessage
-            {
-                RequestUri = new Uri(string.Format("http://localhost/api/httptrigger")),
-                Method = HttpMethod.Post,
-                Content = reqContent
-            };
-            request.Headers.Add("accept", contentType);
-            request.Headers.Add("type", contentType);
-            request.Headers.Add("scenario", "content");
+            headers.Add("accept", contentType);
+            headers.Add("type", contentType);
+            headers.Add("scenario", "content");
             if (isRaw)
             {
-                request.Headers.Add("raw", "true");
+                headers.Add("raw", "true");
             }
             if (isReturn)
             {
-                request.Headers.Add("return", "true");
+                headers.Add("return", "true");
             }
-            request.SetConfiguration(Fixture.RequestConfiguration);
+
+            HttpRequest request = HttpTestHelpers.CreateHttpRequest("POST", "http://localhost/api/httptrigger", headers, content);
 
             Dictionary<string, object> arguments = new Dictionary<string, object>
             {
@@ -335,12 +320,24 @@ namespace Microsoft.Azure.WebJobs.Script.Tests
             };
             await Fixture.Host.CallAsync("HttpTrigger-Scenarios", arguments);
 
-            HttpResponseMessage response = (HttpResponseMessage)request.Properties[ScriptConstants.AzureFunctionsHttpResponseKey];
-            Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            MediaTypeHeaderValue expected = null;
-            MediaTypeHeaderValue.TryParse(expectedContentType ?? contentType, out expected);
-            Assert.Equal(expected, response.Content.Headers.ContentType);
-            return await response.Content.ReadAsStringAsync();
+            var result = (IActionResult)request.HttpContext.Items[ScriptConstants.AzureFunctionsHttpResponseKey];
+
+            if (isRaw)
+            {
+                RawScriptResult rawResult = result as RawScriptResult;
+                Assert.NotNull(rawResult);
+                Assert.Equal(contentType, rawResult.Headers["content-type"].ToString());
+                Assert.Equal(200, rawResult.StatusCode);
+                return rawResult.Content.ToString();
+            }
+            else
+            {
+                ObjectResult objResult = result as ObjectResult;
+                Assert.NotNull(objResult);
+                Assert.Equal(contentType, objResult.ContentTypes[0]);
+                Assert.Equal(200, objResult.StatusCode);
+                return objResult.Value.ToString();
+            }
         }
 
         public class TestFixture : EndToEndTestFixture

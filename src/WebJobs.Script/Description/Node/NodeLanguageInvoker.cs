@@ -35,8 +35,8 @@ namespace Microsoft.Azure.WebJobs.Script.Description
         private readonly Action<ScriptInvocationResult> _handleScriptReturnValue;
 
         internal NodeLanguageInvoker(ScriptHost host, BindingMetadata trigger, FunctionMetadata functionMetadata,
-            Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings, ITraceWriterFactory traceWriterFactory = null)
-            : base(host, functionMetadata, traceWriterFactory)
+            Collection<FunctionBinding> inputBindings, Collection<FunctionBinding> outputBindings)
+            : base(host, functionMetadata)
         {
             _trigger = trigger;
             _inputBindings = inputBindings;
@@ -56,8 +56,7 @@ namespace Microsoft.Azure.WebJobs.Script.Description
 
         protected override async Task InvokeCore(object[] parameters, FunctionInvocationContext context)
         {
-            var userTraceWriter = CreateUserTraceWriter(context.TraceWriter);
-            var logHandler = CreateLogHandler(userTraceWriter);
+            var logHandler = CreateLogHandler(context.Logger);
             string invocationId = context.ExecutionContext.InvocationId.ToString();
             var logSubscription = Host.EventManager
                 .OfType<RpcEvent>()
@@ -163,23 +162,15 @@ namespace Microsoft.Azure.WebJobs.Script.Description
             }
         }
 
-        private static Action<RpcEvent> CreateLogHandler(TraceWriter userTraceWriter)
+        private static Action<RpcEvent> CreateLogHandler(ILogger logger)
         {
             return (rpcEvent) =>
             {
                 var logMessage = rpcEvent.Message.RpcLog;
                 if (logMessage.Message != null)
                 {
-                    try
-                    {
-                        LogLevel logLevel = (LogLevel)logMessage.Level;
-                        userTraceWriter.Trace(new TraceEvent(logLevel.ToTraceLevel(), logMessage.Message));
-                    }
-                    catch (ObjectDisposedException)
-                    {
-                        // if a function attempts to write to a disposed
-                        // TraceWriter
-                    }
+                    LogLevel logLevel = (LogLevel)logMessage.Level;
+                    logger.Log(logLevel, new EventId(0, logMessage.EventId), logMessage.Message, null, null);
                 }
             };
         }

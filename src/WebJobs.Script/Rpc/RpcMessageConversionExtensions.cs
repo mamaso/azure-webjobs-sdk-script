@@ -12,6 +12,9 @@ using Microsoft.Azure.WebJobs.Script.Grpc.Messages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using RpcDataType = Microsoft.Azure.WebJobs.Script.Grpc.Messages.TypedData.DataOneofCase;
+using Microsoft.AspNetCore.Http;
+using System.IO;
+using System.Text;
 
 namespace Microsoft.Azure.WebJobs.Script
 {
@@ -63,50 +66,55 @@ namespace Microsoft.Azure.WebJobs.Script
             {
                 typedData.Json = JObject.FromObject(value).ToString();
             }
-            else if (value is HttpRequestMessage request)
+            else if (value is HttpRequest request)
             {
                 var http = new RpcHttp()
                 {
-                    Url = request.RequestUri.ToString(),
+                    Url = request.Path.ToString(),
                     Method = request.Method.ToString()
                 };
                 typedData.Http = http;
 
-                http.Query.Add(request.GetQueryParameterDictionary());
-                foreach (var pair in request.GetRawHeaders())
+                // http.Query.Add(request.GetQueryParameterDictionary());
+                foreach (var pair in request.Headers)
                 {
-                    http.Headers.Add(pair.Key.ToLowerInvariant(), pair.Value);
+                    http.Headers.Add(pair.Key.ToLowerInvariant(), pair.Value.ToString());
                 }
 
-                if (request.Properties.TryGetValue(HttpExtensionConstants.AzureWebJobsHttpRouteDataKey, out IDictionary<string, object> parameters))
-                {
-                    foreach (var pair in parameters)
-                    {
-                        http.Params.Add(pair.Key, pair.Value.ToString());
-                    }
-                }
+                //if (request.Properties.TryGetValue(HttpExtensionConstants.AzureWebJobsHttpRouteDataKey, out IDictionary<string, object> parameters))
+                //{
+                //    foreach (var pair in parameters)
+                //    {
+                //        http.Params.Add(pair.Key, pair.Value.ToString());
+                //    }
+                //}
 
-                if (request.Content != null && request.Content.Headers.ContentLength > 0)
+                if (request.Body != null && request.ContentLength > 0)
                 {
-                    MediaTypeHeaderValue contentType = request.Content.Headers.ContentType;
                     object body = null;
                     string rawBody = null;
 
-                    switch (contentType?.MediaType)
+                    switch (request.ContentType)
                     {
                         case "application/json":
-                            rawBody = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var jsonReader = new StreamReader(request.Body, Encoding.UTF8);
+                            rawBody = await jsonReader.ReadToEndAsync();
                             body = JsonConvert.DeserializeObject(rawBody);
                             break;
 
                         case "application/octet-stream":
-                            body = await request.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                            var length = Convert.ToInt32(request.ContentLength);
+                            var bytes = new byte[length];
+                            await request.Body.ReadAsync(bytes, 0, length);
+                            body = bytes;
                             break;
 
                         default:
-                            body = rawBody = await request.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            var reader = new StreamReader(request.Body, Encoding.UTF8);
+                            body = rawBody = await reader.ReadToEndAsync();
                             break;
                     }
+                    request.Body.Position = 0;
 
                     http.Body = await body.ToRpcAsync();
                 }

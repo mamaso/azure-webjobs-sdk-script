@@ -1315,15 +1315,13 @@ namespace Microsoft.Azure.WebJobs.Script
                     return ScriptType.Unknown;
             }
         }
-
+         
         private Collection<FunctionDescriptor> GetFunctionDescriptors(Collection<FunctionMetadata> functions)
         {
             var descriptorProviders = new List<FunctionDescriptorProvider>()
                 {
                     new ScriptFunctionDescriptorProvider(this, ScriptConfig),
-#if FEATURE_NODE
                     new NodeFunctionDescriptorProvider(this, ScriptConfig),
-#endif
                     new DotNetFunctionDescriptorProvider(this, ScriptConfig),
 #if FEATURE_POWERSHELL
                     new PowerShellFunctionDescriptorProvider(this, ScriptConfig),
