@@ -1430,7 +1430,7 @@ namespace Microsoft.Azure.WebJobs.Script
 #if FEATURE_POWERSHELL
                     new PowerShellFunctionDescriptorProvider(this, ScriptConfig),
 #endif
-                    new WorkerFunctionDescriptorProvider(this, ScriptConfig),
+                    new WorkerFunctionDescriptorProvider(this, ScriptConfig, FunctionDispatcher),
                 };
 
             IEnumerable<FunctionMetadata> combinedFunctionMetadata = null;
