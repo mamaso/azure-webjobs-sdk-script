@@ -12,6 +12,8 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
     {
         public JavaLanguageWorkerConfig()
         {
+            Extension = ".jar";
+            Language = "Java";
             var javaHome = Environment.GetEnvironmentVariable("JAVA_HOME") ?? string.Empty;
             if (ScriptSettingsManager.Instance.IsAzureEnvironment)
             {
@@ -20,17 +22,36 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             }
             var javaPath = Path.Combine(javaHome, "bin", "java");
             ExecutablePath = Path.GetFullPath(javaPath);
+
             var workerJar = Environment.GetEnvironmentVariable("AzureWebJobsJavaWorkerPath");
             if (string.IsNullOrEmpty(workerJar))
             {
                 workerJar = Path.Combine(Location, "workers", "java", "azure-functions-java-worker.jar");
             }
 
+            var settingsManager = ScriptSettingsManager.Instance;
+            var javaSection = settingsManager.Configuration
+                .GetSection("workers")
+                .GetSection(Language);
+
+            var javaOpts = settingsManager.GetSetting("JAVA_OPTS") ?? string.Empty;
+
+            var debugSection = javaSection.GetSection("debug");
+            if (debugSection.Value != null)
+            {
+                int port = 5005;
+                try
+                {
+                    port = Convert.ToInt32(debugSection.Value);
+                }
+                catch
+                {
+                }
+                javaOpts = $"-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address={port}";
+            }
+
             // Load the JVM starting parameters to support attach to debugging.
-            var javaOpts = Environment.GetEnvironmentVariable("JAVA_OPTS") ?? string.Empty;
             WorkerPath = $"-jar {javaOpts} \"{workerJar}\"";
-            Extension = ".jar";
-            Language = "Java";
         }
     }
 }

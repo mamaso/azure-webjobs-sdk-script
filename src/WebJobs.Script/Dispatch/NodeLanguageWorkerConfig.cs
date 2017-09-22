@@ -14,13 +14,28 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
         public NodeLanguageWorkerConfig()
         {
             ExecutablePath = "node";
-            string value = ScriptSettingsManager.Instance.GetSetting(EnvironmentSettingNames.AzureWebJobsEnvironment);
-            if (string.Compare("Development", value, StringComparison.OrdinalIgnoreCase) == 0) {
-                ExecutableArguments = new Dictionary<string, string>()
+            Language = "Node";
+            ExecutableArguments = new Dictionary<string, string>();
+
+            var nodeSection = ScriptSettingsManager.Instance.Configuration
+                .GetSection("workers")
+                .GetSection(Language);
+
+            var inspectSection = nodeSection.GetSection("inspect");
+
+            if (inspectSection.Value != null)
+            {
+                int port = 5858;
+                try
                 {
-                    ["--inspect"] = string.Empty
-                };
+                    port = Convert.ToInt32(inspectSection.Value);
+                }
+                catch
+                {
+                }
+                ExecutableArguments.Add($"--inspect={port}", string.Empty);
             }
+
             WorkerPath = Environment.GetEnvironmentVariable("NodeJSWorkerPath");
             if (string.IsNullOrEmpty(WorkerPath))
             {
@@ -28,7 +43,6 @@ namespace Microsoft.Azure.WebJobs.Script.Dispatch
             }
             WorkerPath = "\"" + WorkerPath + "\"";
             Extension = ".js";
-            Language = "Node";
         }
     }
 }
